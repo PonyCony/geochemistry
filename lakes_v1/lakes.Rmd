@@ -1,0 +1,218 @@
+---
+title: "Lakes"
+author: "Sanzhapova Liaisan"
+output:
+  html_document:
+    df_print: paged
+    code_folding: "hide"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE, warning = FALSE, include=FALSE}
+library(psych)
+library(xlsx)
+library(corrplot)
+library(plotly)
+
+#Loading the dataset
+lake1=read.xlsx("C:\\Users\\Lyasa\\Documents\\доки\\10\\курсач\\try\\lakes.xlsx",1)
+lake1=lake1[,-c(1)] #delete column 1
+
+lake2=read.xlsx("C:\\Users\\Lyasa\\Documents\\доки\\10\\курсач\\try\\lakes.xlsx",2)
+lake2=lake2[,-c(1, 15:17, 28)] #delete column 1 and with most NAs
+lake2=lake2[complete.cases(lake2),]
+
+lake3=read.xlsx("C:\\Users\\Lyasa\\Documents\\доки\\10\\курсач\\try\\lakes.xlsx",3)
+lake3=lake3[,-c(1)] #delete column 1
+colnames(lake3)[colnames(lake3)=="depth..cm"] <- "depth"
+
+l=rep("Озеро 1", nrow(lake1))
+lake1=cbind(lake1, l)
+l=rep("Озеро 2", nrow(lake2))
+lake2=cbind(lake2, l)
+l=rep("Озеро 3", nrow(lake3))
+lake3=cbind(lake3, l)
+lakes=merge(lake1, lake2, all = TRUE)
+lakes=merge(lakes, lake3, all = TRUE)
+lakes=lakes[,-c(49, 50)] #delete columns As, Ge
+lake1=lake1[,-50] #delete column l
+lake2=lake2[,-48] #delete column l
+lake3=lake3[,-48] #delete column l
+```
+
+##Первое озеро
+
+Опишем имеющиеся данные:
+```{r warning = FALSE, comment=NA}
+describe(lake1)
+error.dots(lake1)
+cat("Матрица корреляций. Показываем только больше 0,5")
+# Calculate the correlation matrix first
+lake1_cor <- cor(lake1, use = "pairwise.complete.obs")
+# Get some colors
+# Показываем только больше 0,5
+corrplot(lake1_cor, order="original", method="square", tl.pos="lt", type="lower",        
+        tl.col="black", tl.cex=0.6, tl.srt=45, 
+        p.mat = 1-abs(lake1_cor), sig.level=0.50, insig = "blank")  
+
+# Testing Correlations' Significance: P-values
+#corr.test(lake1, use = "pairwise.complete.obs")$p
+
+cat("Сколько факторов выбрать?")
+# Then use that correlation matrix to create the scree plot
+scree(lake1_cor, factors = FALSE)
+
+cat("Проведём анализ с 3 факторами. Каждый объединяет хим элементы следующим образом:")
+#Factor analysis of the data
+fa_lake1 <- fa(r = cor(lake1), nfactors = 3)
+#Getting the factor loadings and model analysis
+fa_lake1$loadings
+cat("1 фактор описывает данные на 76.9% 
+    \n1+2 факторы описывают данные на 85.6%
+    \n1+2+3 факторы описывают данные на 91%")
+
+fa.plot(fa_lake1)
+fa.diagram(fa_lake1)
+
+cat("3D интерактивно")
+fa1_scores <- factor.scores(lake1, fa_lake1)$scores
+fa1_scores = as.data.frame(fa1_scores)
+# 3D plot :
+p <- plot_ly(fa1_scores, x = ~MR1, y = ~MR2, z = ~MR3, type="scatter3d", mode="markers")
+p
+```
+
+
+##Второе озеро
+
+Опишем имеющиеся данные:
+```{r warning = FALSE, comment=NA}
+describe(lake2)
+error.dots(lake2)
+cat("Матрица корреляций. Показываем только больше 0,5")
+# Calculate the correlation matrix first
+lake2_cor <- cor(lake2, use = "pairwise.complete.obs")
+# Get some colors
+# Показываем только больше 0,5
+corrplot(lake2_cor, order="original", method="square", tl.pos="lt", type="lower",        
+        tl.col="black", tl.cex=0.6, tl.srt=45, 
+        p.mat = 1-abs(lake2_cor), sig.level=0.50, insig = "blank")  
+
+# Testing Correlations' Significance: P-values
+#corr.test(lake2, use = "pairwise.complete.obs")$p
+
+cat("Сколько факторов выбрать?")
+# Then use that correlation matrix to create the scree plot
+scree(lake2_cor, factors = FALSE)
+
+cat("Проведём анализ с 3 факторами. Каждый объединяет хим элементы следующим образом:")
+#Factor analysis of the data
+fa_lake2 <- fa(r = cor(lake2), nfactors = 3)
+#Getting the factor loadings and model analysis
+fa_lake2$loadings
+cat("1 фактор описывает данные на 57.9% 
+    \n1+2 факторы описывают данные на 69.7%
+    \n1+2+3 факторы описывают данные на 76.9%")
+
+fa.plot(fa_lake2)
+fa.diagram(fa_lake2)
+
+cat("3D интерактивно")
+fa2_scores <- factor.scores(lake2, fa_lake2)$scores
+fa2_scores = as.data.frame(fa2_scores)
+# 3D plot :
+p <- plot_ly(fa2_scores, x = ~MR1, y = ~MR2, z = ~MR3, type="scatter3d", mode="markers")
+p
+```
+
+
+##Третье озеро
+
+Опишем имеющиеся данные:
+```{r warning = FALSE, comment=NA}
+describe(lake3)
+error.dots(lake3)
+cat("Матрица корреляций. Показываем только больше 0,5")
+# Calculate the correlation matrix first
+lake3_cor <- cor(lake3, use = "pairwise.complete.obs")
+# Get some colors
+# Показываем только больше 0,5
+corrplot(lake3_cor, order="original", method="square", tl.pos="lt", type="lower",        
+        tl.col="black", tl.cex=0.6, tl.srt=45, 
+        p.mat = 1-abs(lake3_cor), sig.level=0.50, insig = "blank")  
+
+# Testing Correlations' Significance: P-values
+#corr.test(lake3, use = "pairwise.complete.obs")$p
+
+cat("Сколько факторов выбрать?")
+# Then use that correlation matrix to create the scree plot
+scree(lake3_cor, factors = FALSE)
+
+cat("Проведём анализ с 3 факторами. Каждый объединяет хим элементы следующим образом:")
+#Factor analysis of the data
+fa_lake3 <- fa(r = cor(lake3), nfactors = 3)
+#Getting the factor loadings and model analysis
+fa_lake3$loadings
+cat("1 фактор описывает данные на 51.2% 
+    \n1+2 факторы описывают данные на 79.9%
+    \n1+2+3 факторы описывают данные на 89.1%")
+
+fa.plot(fa_lake3)
+fa.diagram(fa_lake3)
+
+cat("3D интерактивно")
+fa3_scores <- factor.scores(lake3, fa_lake3)$scores
+fa3_scores = as.data.frame(fa3_scores)
+# 3D plot :
+p <- plot_ly(fa3_scores, x = ~MR1, y = ~MR2, z = ~MR3, type="scatter3d", mode="markers")
+p
+```
+
+
+##Совместно
+
+Опишем имеющиеся данные:
+```{r warning = FALSE, comment=NA}
+l=lakes[,48]
+lakes=lakes[,-48]
+describe(lakes)
+error.dots(lakes)
+cat("Матрица корреляций. Показываем только больше 0,5")
+# Calculate the correlation matrix first
+lakes_cor <- cor(lakes, use = "pairwise.complete.obs")
+# Get some colors
+# Показываем только больше 0,5
+corrplot(lakes_cor, order="original", method="square", tl.pos="lt", type="lower",        
+        tl.col="black", tl.cex=0.6, tl.srt=45, 
+        p.mat = 1-abs(lakes_cor), sig.level=0.50, insig = "blank")  
+
+# Testing Correlations' Significance: P-values
+#corr.test(lakes, use = "pairwise.complete.obs")$p
+
+cat("Сколько факторов выбрать?")
+# Then use that correlation matrix to create the scree plot
+scree(lakes_cor, factors = FALSE)
+
+cat("Проведём анализ с 3 факторами. Каждый объединяет хим элементы следующим образом:")
+#Factor analysis of the data
+fa_lakes <- fa(r = cor(lakes), nfactors = 3)
+#Getting the factor loadings and model analysis
+fa_lakes$loadings
+cat("1 фактор описывает данные на 56.3% 
+    \n1+2 факторы описывают данные на 67.8%
+    \n1+2+3 факторы описывают данные на 79.1%")
+
+fa.plot(fa_lakes)
+fa.diagram(fa_lakes)
+
+cat("3D интерактивно")
+fa_scores <- factor.scores(lakes, fa_lakes)$scores
+fa_scores = as.data.frame(fa_scores)
+fa_scores$lake = l
+# 3D plot :
+p <- plot_ly(fa_scores, x = ~MR1, y = ~MR2, z = ~MR3, color = ~lake, type="scatter3d", mode="markers")
+p
+```
